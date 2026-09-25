@@ -22,7 +22,7 @@ public class PutLinkHandler implements Handler {
                 StandardCharsets.UTF_8
         );
 
-       urlShortener.update(linkId, link);
+        urlShortener.update(linkId, link);
 
         exchange.getResponseHeaders().set("Content-Type", "text/html; charset=utf-8");
         exchange.sendResponseHeaders(200, -1);
