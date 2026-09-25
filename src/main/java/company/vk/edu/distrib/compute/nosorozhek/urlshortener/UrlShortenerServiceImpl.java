@@ -59,13 +59,13 @@ public class UrlShortenerServiceImpl implements UrlShortenerService {
         try {
             urlDao.close();
         } catch (IOException e) {
-            log.error("Failed to close urlDao: {}", e.getMessage(), e);
+            log.error("Failed to close urlDao", e);
         }
 
         try {
             userDao.close();
         } catch (IOException e) {
-            log.error("Failed to close authDao: {}", e.getMessage(), e);
+            log.error("Failed to close authDao", e);
         }
     }
 }

@@ -2,8 +2,8 @@ package company.vk.edu.distrib.compute.nosorozhek.urlshortener.handlers;
 
 import com.sun.net.httpserver.HttpExchange;
 import company.vk.edu.distrib.compute.nosorozhek.urlshortener.authentication.AuthenticationMiddleware;
-import company.vk.edu.distrib.compute.nosorozhek.urlshortener.authentication.UserService;
 import company.vk.edu.distrib.compute.nosorozhek.urlshortener.authentication.Credentials;
+import company.vk.edu.distrib.compute.nosorozhek.urlshortener.authentication.UserService;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

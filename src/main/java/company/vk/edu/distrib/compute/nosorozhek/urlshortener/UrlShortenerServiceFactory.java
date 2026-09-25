@@ -14,7 +14,14 @@ import java.nio.file.Path;
 @UrlShortenerAuthTest
 public class UrlShortenerServiceFactory extends AbstractHttpServiceFactory<UrlShortenerService> {
     private static final String DATA_DIR_ENV = "SERVICE_DATA_DIR";
-    private static final String DEFAULT_DATA_DIR = "data";
+
+    private static Path getDataDirectory() {
+        String configuredDirectory = System.getenv(DATA_DIR_ENV);
+        if (configuredDirectory == null || configuredDirectory.isBlank()) {
+            return Path.of(System.getProperty("java.io.tmpdir"));
+        }
+        return Path.of(configuredDirectory);
+    }
 
     @Override
     protected UrlShortenerService doCreate(int port) throws IOException {
@@ -25,13 +32,5 @@ public class UrlShortenerServiceFactory extends AbstractHttpServiceFactory<UrlSh
         Dao<String> userDao = new PersistentDao(dataDirectory.resolve("users.data"));
 
         return new UrlShortenerServiceImpl(urlDao, userDao, port);
-    }
-
-    private static Path getDataDirectory() {
-        String configuredDirectory = System.getenv(DATA_DIR_ENV);
-        if (configuredDirectory == null || configuredDirectory.isBlank()) {
-            return Path.of(DEFAULT_DATA_DIR);
-        }
-        return Path.of(configuredDirectory);
     }
 }
