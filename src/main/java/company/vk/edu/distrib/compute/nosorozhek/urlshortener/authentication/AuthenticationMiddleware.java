@@ -12,16 +12,6 @@ public class AuthenticationMiddleware {
         this.userService = userService;
     }
 
-    public Handler wrap(Handler handler) throws InvalidCredentialsException, UnauthorizedException {
-        return (exchange, parameters) -> {
-            var headers = exchange.getRequestHeaders();
-            Credentials credentials = parseBasicCredentials(headers.getFirst(AUTHORIZATION));
-            userService.authenticate(credentials);
-
-            handler.handle(exchange, parameters);
-        };
-    }
-
     private static Credentials parseBasicCredentials(String header)
             throws InvalidCredentialsException, UnauthorizedException {
         if (header == null) {
@@ -52,5 +42,15 @@ public class AuthenticationMiddleware {
                 value.substring(0, colon),
                 value.substring(colon + 1)
         );
+    }
+
+    public Handler wrap(Handler handler) throws InvalidCredentialsException, UnauthorizedException {
+        return (exchange, parameters) -> {
+            var headers = exchange.getRequestHeaders();
+            Credentials credentials = parseBasicCredentials(headers.getFirst(AUTHORIZATION));
+            userService.authenticate(credentials);
+
+            handler.handle(exchange, parameters);
+        };
     }
 }

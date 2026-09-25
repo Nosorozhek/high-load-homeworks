@@ -23,18 +23,22 @@ public class Router implements HttpHandler {
 
     private final List<Route> routes = new ArrayList<>();
 
-    @Override
-    public void handle(HttpExchange exchange) throws IOException {
-        HttpMethod method = switch (exchange.getRequestMethod()) {
+    private HttpMethod parseMethod(String method) {
+        return switch (method) {
             case "GET" -> HttpMethod.GET;
             case "POST" -> HttpMethod.POST;
             case "PUT" -> HttpMethod.PUT;
             case "DELETE" -> HttpMethod.DELETE;
             default -> null;
         };
+    }
 
+    @Override
+    public void handle(HttpExchange exchange) throws IOException {
+        String requestMethod = exchange.getRequestMethod();
+        HttpMethod method = parseMethod(requestMethod);
         if (method == null) {
-            log.warn("Unexpected request method: {}", exchange.getRequestMethod());
+            log.warn("Unexpected request method: {}", requestMethod);
         }
 
         String path = exchange.getRequestURI().getPath();
