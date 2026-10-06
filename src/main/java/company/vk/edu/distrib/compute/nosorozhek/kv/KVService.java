@@ -21,10 +21,8 @@ public class KVService implements company.vk.edu.distrib.compute.kv.KVService {
         this.dao = dao;
         server = HttpServer.create(new InetSocketAddress(port), 0);
         server.createContext("/", createRouter());
-        executor = numThreads > 1 ? Executors.newFixedThreadPool(numThreads) : null;
-        if (executor != null) {
-            server.setExecutor(executor);
-        }
+        executor = Executors.newFixedThreadPool(numThreads);
+        server.setExecutor(executor);
     }
 
     private Router createRouter() {
@@ -45,9 +43,7 @@ public class KVService implements company.vk.edu.distrib.compute.kv.KVService {
     public void stop() {
         log.info("Stopping");
         server.stop(1);
-        if (executor != null) {
-            executor.close();
-        }
+        executor.close();
 
         try {
             dao.close();
