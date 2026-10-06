@@ -73,6 +73,6 @@ public class PersistentDao implements Dao<byte[]> {
 
     @Override
     public void close() throws IOException {
-        // skip
+        // skip this
     }
 }
