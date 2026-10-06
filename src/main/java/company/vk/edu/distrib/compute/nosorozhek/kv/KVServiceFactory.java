@@ -12,6 +12,7 @@ import java.nio.file.Path;
 public class KVServiceFactory extends AbstractHttpServiceFactory<company.vk.edu.distrib.compute.kv.KVService> {
     private static final String DATA_DIR_ENV = "SERVICE_DATA_DIR";
     private static final String NUM_THREADS_ENV = "NUM_THREADS";
+    private static final int MIN_THREADS = 1;
 
     private static Path getDataDirectory() {
         String configuredDirectory = System.getenv(DATA_DIR_ENV);
@@ -24,11 +25,11 @@ public class KVServiceFactory extends AbstractHttpServiceFactory<company.vk.edu.
     private static int getNumThreads() {
         String configured = System.getenv(NUM_THREADS_ENV);
         if (configured == null || configured.isBlank()) {
-            return 1;
+            return MIN_THREADS;
         }
         try {
             int numThreads = Integer.parseInt(configured.strip());
-            if (numThreads < 1) {
+            if (numThreads < MIN_THREADS) {
                 throw new IllegalArgumentException(NUM_THREADS_ENV + " must be positive");
             }
             return numThreads;

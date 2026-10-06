@@ -13,6 +13,10 @@ import java.util.NoSuchElementException;
 import java.util.function.Function;
 
 public final class RemoteDao<T> implements Dao<T> {
+    private static final int HTTP_BAD_REQUEST = 400;
+    private static final int HTTP_NOT_FOUND = 404;
+    private static final int HTTP_UNPROCESSABLE_ENTITY = 422;
+
     private final HttpClient client = HttpClient.newHttpClient();
     private final String host;
     private final int port;
@@ -31,7 +35,7 @@ public final class RemoteDao<T> implements Dao<T> {
         if (status == expected) {
             return;
         }
-        if (status == 400 || status == 422) {
+        if (status == HTTP_BAD_REQUEST || status == HTTP_UNPROCESSABLE_ENTITY) {
             throw new IllegalArgumentException("KV service returned status code " + status);
         }
         throw new IOException("KV service returned sattus code " + status);
@@ -58,7 +62,7 @@ public final class RemoteDao<T> implements Dao<T> {
     public T get(String key) throws IOException {
         HttpRequest request = HttpRequest.newBuilder(entityUri(key)).GET().build();
         HttpResponse<byte[]> response = send(request);
-        if (response.statusCode() == 404) {
+        if (response.statusCode() == HTTP_NOT_FOUND) {
             throw new NoSuchElementException("No entry for key: " + key);
         }
         expect(response, 200);
