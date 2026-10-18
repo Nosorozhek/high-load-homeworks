@@ -6,6 +6,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -20,9 +21,17 @@ public class PersistentDao implements Dao<String> {
     }
 
     private void saveEntries() throws IOException {
-        try (OutputStream outputStream = Files.newOutputStream(filePath);
-             ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream)) {
-            objectOutputStream.writeObject(entries);
+        Path temporary = Files.createTempFile(filePath.getParent(), "urlshortener-data-", ".tmp");
+        try {
+            try (OutputStream outputStream = Files.newOutputStream(temporary);
+                 ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream)) {
+                objectOutputStream.writeObject(entries);
+            }
+            Files.move(temporary, filePath,
+                    StandardCopyOption.ATOMIC_MOVE,
+                    StandardCopyOption.REPLACE_EXISTING);
+        } finally {
+            Files.deleteIfExists(temporary);
         }
     }
 
