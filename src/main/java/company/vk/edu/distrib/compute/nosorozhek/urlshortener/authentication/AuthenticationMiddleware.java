@@ -6,7 +6,7 @@ import java.util.Base64;
 
 public class AuthenticationMiddleware {
     private static final String AUTHORIZATION = "Authorization";
-    UserService userService;
+    private final UserService userService;
 
     public AuthenticationMiddleware(UserService userService) {
         this.userService = userService;
