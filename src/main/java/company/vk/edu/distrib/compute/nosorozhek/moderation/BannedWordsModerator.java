@@ -12,6 +12,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,7 +30,7 @@ public class BannedWordsModerator {
                 bannedWords = reader.lines()
                         .map(String::trim)
                         .filter(line -> !line.isEmpty())
-                        .map(String::toLowerCase)
+                        .map(word -> word.toLowerCase(Locale.ROOT))
                         .collect(Collectors.toCollection(HashSet::new));
             }
         } catch (IOException e) {
@@ -38,7 +39,7 @@ public class BannedWordsModerator {
     }
 
     public ModerationResultEvent moderate(LinkCreatedEvent event) {
-        String url = URLDecoder.decode(event.url(), StandardCharsets.UTF_8).toLowerCase();
+        String url = URLDecoder.decode(event.url(), StandardCharsets.UTF_8).toLowerCase(Locale.ROOT);
         for (String word : bannedWords) {
             if (url.contains(word)) {
                 return new ModerationResultEvent(event.id(), false,
