@@ -7,6 +7,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.HashSet;
@@ -27,16 +29,18 @@ public class BannedWordsModerator {
                 bannedWords = reader.lines()
                         .map(String::trim)
                         .filter(line -> !line.isEmpty())
+                        .map(String::toLowerCase)
                         .collect(Collectors.toCollection(HashSet::new));
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException("Failed to load banned words", e);
         }
     }
 
     public ModerationResultEvent moderate(LinkCreatedEvent event) {
+        String url = URLDecoder.decode(event.url(), StandardCharsets.UTF_8).toLowerCase();
         for (String word : bannedWords) {
-            if (event.url().contains(word)) {
+            if (url.contains(word)) {
                 return new ModerationResultEvent(event.id(), false,
                         "Url contains forbidedn word: \"" + word + "\"", Instant.now());
             }

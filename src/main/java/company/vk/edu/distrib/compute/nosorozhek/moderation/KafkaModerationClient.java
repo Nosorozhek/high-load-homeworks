@@ -83,7 +83,7 @@ public class KafkaModerationClient implements LinkCreatedPublisher {
         return properties;
     }
 
-    public synchronized void start() {
+    public void start() {
         if (stopped.get()) {
             throw new IllegalStateException("Kafka client has been stopped");
         }
@@ -172,7 +172,7 @@ public class KafkaModerationClient implements LinkCreatedPublisher {
     }
 
     @SuppressWarnings("PMD.UseTryWithResources")
-    public synchronized void stop() {
+    public void stop() {
         if (stopped.get()) {
             return;
         }

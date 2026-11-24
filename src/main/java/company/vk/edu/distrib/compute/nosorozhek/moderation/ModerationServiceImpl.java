@@ -16,6 +16,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
@@ -29,6 +30,7 @@ public class ModerationServiceImpl implements ModerationService {
     static final String CREATED_TOPIC = "links.created";
     static final String MODERATED_TOPIC = "links.moderated";
     static final String DLT_TOPIC = "links.created.dlt";
+    private static final String ERROR_HEADER = "error";
     private static final Logger log = LoggerFactory.getLogger(ModerationServiceImpl.class);
     private static final Duration KAFKA_TIMEOUT = Duration.ofMillis(500);
     private static final long RETRY_DELAY_MS = 100;
@@ -77,7 +79,7 @@ public class ModerationServiceImpl implements ModerationService {
     }
 
     @Override
-    public synchronized void start() {
+    public void start() {
         if (stopped) {
             throw new IllegalStateException("Moderation service has been stopped");
         }
@@ -147,20 +149,22 @@ public class ModerationServiceImpl implements ModerationService {
     }
 
     private void process(ConsumerRecord<String, String> record) throws ExecutionException, InterruptedException {
-        LinkCreatedEvent event;
+        ModerationResultEvent result;
         try {
-            event = codec.decodeCreated(record.value());
-        } catch (IllegalArgumentException e) {
-            producer.send(new ProducerRecord<>(DLT_TOPIC, record.key(), record.value())).get();
+            LinkCreatedEvent event = codec.decodeCreated(record.value());
+            result = moderator.moderate(event);
+        } catch (RuntimeException e) {
+            ProducerRecord<String, String> deadLetter = new ProducerRecord<>(DLT_TOPIC, record.key(), record.value());
+            deadLetter.headers().add(ERROR_HEADER, e.toString().getBytes(StandardCharsets.UTF_8));
+            producer.send(deadLetter).get();
             return;
         }
-        ModerationResultEvent result = moderator.moderate(event);
-        producer.send(new ProducerRecord<>(MODERATED_TOPIC, event.id(), codec.encodeResult(result))).get();
+        producer.send(new ProducerRecord<>(MODERATED_TOPIC, result.id(), codec.encodeResult(result))).get();
     }
 
     @Override
     @SuppressWarnings("PMD.UseTryWithResources")
-    public synchronized void stop() {
+    public void stop() {
         if (stopped) {
             return;
         }
